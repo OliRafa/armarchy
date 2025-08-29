@@ -130,7 +130,8 @@ $PKG_MANAGER -S --noconfirm --needed \
   xdg-desktop-portal-hyprland \
   xmlstarlet \
   xournalpp \
-  zoxide
+  zoxide \
+  python-terminaltexteffects
 
 if [ -z "$OMARCHY_ARM" ]; then
   $PKG_MANAGER -S --noconfirm --needed \
@@ -141,7 +142,6 @@ if [ -z "$OMARCHY_ARM" ]; then
   obsidian \
   omarchy-chromium \
   pinta \
-  python-terminaltexteffects \
   ufw-docker \
   signal-desktop \
   spotify \

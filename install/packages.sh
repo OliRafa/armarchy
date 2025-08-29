@@ -133,7 +133,6 @@ $PKG_MANAGER -S --noconfirm --needed \
   xmlstarlet \
   xournalpp \
   yaru-icon-theme \
-  yay \
   zoxide
 
 if [ -z "$OMARCHY_ARM" ]; then

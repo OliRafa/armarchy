@@ -35,8 +35,8 @@ if [ -n "$(lspci | grep -i 'nvidia')" ]; then
     sudo sed -i '/^#\s*\[multilib\]/,/^#\s*Include/ s/^#\s*//' /etc/pacman.conf
   fi
 
-  # force package database refresh
-  sudo pacman -Syu --noconfirm
+  # Skip package database refresh (already done in repositories.sh)
+  # sudo pacman -Syu --noconfirm
 
   # Install packages
   PACKAGES_TO_INSTALL=(

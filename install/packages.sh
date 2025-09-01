@@ -1,7 +1,7 @@
 # Manually install yay from AUR if not already available
 if ! command -v yay &>/dev/null; then
-  # Install build tools
-  sudo pacman -Sy --needed --noconfirm base-devel
+  # Install build tools (no sync, already done in repositories.sh)
+  sudo pacman -S --needed --noconfirm base-devel
   cd /tmp
   rm -rf yay-bin
   git clone https://aur.archlinux.org/yay-bin.git

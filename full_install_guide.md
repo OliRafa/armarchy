@@ -475,6 +475,7 @@ chmod +x install-limine-automated.sh
 ```
 
 **What the automated script does:**
+
 - ✅ Updates system packages
 - ✅ Installs development tools and AUR helper
 - ✅ Configures Snapper for Btrfs snapshots
@@ -486,12 +487,14 @@ chmod +x install-limine-automated.sh
 - ✅ Creates global symlinks for command access
 
 **The script will prompt you to choose:**
+
 - **Test mode**: Boot Limine once for testing (keeps GRUB as default)
 - **Default mode**: Make Limine the permanent default bootloader
 
 **After running the automated script:**
+
 - The system will be fully configured with Limine bootloader
-- Skip ahead to **[📍 RESUME HERE: Post-Automated Script Installation](#-resume-here-post-automated-script-installation)** 
+- Skip ahead to **[📍 RESUME HERE: Post-Automated Script Installation](#-resume-here-post-automated-script-installation)**
 - All manual steps (Step 0-11) are handled automatically
 
 ---
@@ -1027,6 +1030,7 @@ It should show: `\EFI\BOOT\BOOTAA64.EFI`
 **If you used the automated installation script above, resume from this point.**
 
 **Your system now has:**
+
 - ✅ Limine bootloader fully configured with hierarchical snapshots
 - ✅ All Omarchy scripts and services installed
 - ✅ Automatic snapshot monitoring active
@@ -1062,7 +1066,7 @@ Copy the full CD directory to home directory and rename it to `prl-tools-build`
 cp -R /mnt ~ &&
 cd ~ &&
 mv mnt prl-tools-build &&
-cd mnt prl-tools-build
+cd prl-tools-build
 ```
 
 Install the prerequisites to build `prl-tools-build`
@@ -1086,7 +1090,6 @@ View the `parallels-tools-install.log` with:
 cat /var/log/parallels-tools-install.log
 ```
 
-
 ## Step 13: Install Omarchy (finally!)
 
 We made it! Definitely take a snapshot in both Arch and Parallels at this point so that you have a fresh pre-Omarchy install attempt point to revert to.
@@ -1104,7 +1107,6 @@ wget -qO- https://raw.githubusercontent.com/nilszeilon/armarchy/master/boot.sh |
 ```
 
 Follow the prompts and good luck...
-
 
 ## Step 14: Configure ARM-Specific Packages (If Needed)
 
@@ -1159,6 +1161,7 @@ sudo pacman -Syu
 ```
 
 Install widevine
+
 ```bash
 pacman -S asahi-alarm/widevine
 ```

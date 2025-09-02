@@ -506,9 +506,9 @@ sudo pacman -S --needed --noconfirm snapper
 
 #### Install `limine-mkinitcpio-hook` for the `btrfs-overlayfs` hook\*
 
-> \*needed for snapshot booting
+> \*needed for snapshot booting - provides overlayfs support specifically for Limine
 
-This handles yay's interactive prompts automatically
+This handles yay's interactive prompts automatically and will install a newer limine version as a dependency, which we'll override later with our manually installed Limine 9.5.3 to avoid a bug in newer versions that prevent limine from properly reading our config file.
 
 ```bash
 (echo "1"; echo "N"; echo "N"; echo "N") | yay -S --noconfirm limine-mkinitcpio-hook || {
@@ -516,6 +516,12 @@ This handles yay's interactive prompts automatically
     # Fallback: Install with minimal interaction
     yay -S --answerdiff None --answerclean None --removemake --noconfirm limine-mkinitcpio-hook
 }
+```
+
+Note: if you get any errors here like 404, run:
+
+```bash
+sudo pacman -Syu
 ```
 
 ## Step 3: Configure Snapper
@@ -548,9 +554,10 @@ sudo sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5"/' /etc/sn
 OMARCHY_BIN="$HOME/.local/share/omarchy/bin"
 mkdir -p "$OMARCHY_BIN"
 
-# Download Omarchy scripts from the repository
+# Download Omarchy scripts from the ARM fork repository (vm-testing branch)
 cd /tmp
-git clone https://github.com/jondkinney/Omarchy.git omarchy-tmp
+rm -rf omarchy-tmp 2>/dev/null || true
+git clone --depth 1 --branch vm-testing https://github.com/jondkinney/armarchy.git omarchy-tmp
 cp omarchy-tmp/bin/omarchy-limine-update "$OMARCHY_BIN/"
 cp omarchy-tmp/bin/omarchy-limine-snapshot-hook "$OMARCHY_BIN/"
 chmod +x "$OMARCHY_BIN/omarchy-limine-update"
@@ -699,6 +706,10 @@ fi
 TMPDIR="/tmp/limine"
 echo "Installing $TMPDIR/BOOTAA64.EFI → $EFI_DIR/BOOTAA64.EFI"
 sudo install -m 0644 "$TMPDIR/BOOTAA64.EFI" "$EFI_DIR/BOOTAA64.EFI"
+
+# Override the older limine version installed by limine-mkinitcpio-hook
+# Our Limine 9.5.3 BOOTAA64.EFI is now the active bootloader
+echo "✅ Limine 9.5.3 BOOTAA64.EFI installed, overriding older version from limine-mkinitcpio-hook"
 ```
 
 #### Create or find Limine boot entry

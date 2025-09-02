@@ -466,161 +466,51 @@ sudo sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5"/' /etc/snapper/configs/root
 sudo sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5"/' /etc/snapper/configs/root
 ```
 
-## Step 4: Create Custom Sync Script for ARM64
+## Step 4: Install Automatic Snapshot System
 
-We'll create a custom script since the Java-based tools don't work with ARM64 Limine v9 syntax:
+Install the Omarchy scripts and services for automatic snapshot menu updates:
+
+### Install Omarchy Scripts
 
 ```bash
-sudo tee /usr/local/bin/limine-snapshot-sync-arm <<EOF
-#!/bin/bash
+# Create directory structure
+OMARCHY_BIN="$HOME/.local/share/omarchy/bin"
+mkdir -p "$OMARCHY_BIN"
 
-LIMINE_CONF="$EFI_DIR/limine.conf"
-UUID=\$(blkid | grep 'TYPE="btrfs"' | grep -oP 'UUID="\K[^"]+' | head -1)
+# Download Omarchy scripts from the repository
+cd /tmp
+git clone https://github.com/jondkinney/Omarchy.git omarchy-tmp
+cp omarchy-tmp/bin/omarchy-limine-update "$OMARCHY_BIN/"
+cp omarchy-tmp/bin/omarchy-limine-snapshot-hook "$OMARCHY_BIN/"
+chmod +x "$OMARCHY_BIN/omarchy-limine-update"
+chmod +x "$OMARCHY_BIN/omarchy-limine-snapshot-hook"
 
-# Remove old snapshot entries (everything after the fallback entry)
-sed -i '/^\/Snapshot/,\$d' "\$LIMINE_CONF"
-
-# Add snapshot entries using simple parsing
-snapper -c root list | tail -n +3 | while read -r line; do
-    # Extract snapshot number (first field)
-    num=\$(echo "\$line" | awk '{print \$1}')
-
-    # Extract description (everything after the last │)
-    desc=\$(echo "\$line" | sed 's/.*│ \([^│]*\) │\$/\1/' | xargs)
-
-    if [[ \$num != "0" && -n \$num && \$num =~ ^[0-9]+\$ ]]; then
-        # Clean description or use default
-        [[ -z "\$desc" || "\$desc" == " " || "\$desc" == "-" ]] && desc="System snapshot"
-
-        cat >> "\$LIMINE_CONF" <<ENTRY
-
-/Snapshot \$num - \$desc
-    protocol: linux
-    path: boot():/Image
-    module_path: boot():/initramfs-linux.img
-    cmdline: root=UUID=\$UUID rw rootfstype=btrfs rootflags=subvol=root/.snapshots/\$num/snapshot
-ENTRY
-    fi
-done
-
-echo "Synchronized snapshots to Limine boot menu"
-EOF
-
-sudo chmod +x /usr/local/bin/limine-snapshot-sync-arm
+# Make scripts globally accessible
+sudo ln -sf "$OMARCHY_BIN/omarchy-limine-update" /usr/local/bin/
+sudo ln -sf "$OMARCHY_BIN/omarchy-limine-snapshot-hook" /usr/local/bin/
 ```
 
-## Step 5: Set Up Automatic Snapshot Sync Service for ARM64
-
-Create a watcher service that monitors for snapshot changes and automatically syncs them to Limine:
+### Install Systemd Services
 
 ```bash
-# Create ARM64 watcher script that monitors snapshot directory
-sudo tee /usr/local/bin/limine-snapshot-sync-arm-watcher <<'EOF'
-#!/bin/bash
-
-WATCH_DIR="/.snapshots"
-SYNC_CMD="/usr/local/bin/limine-snapshot-sync-arm"
-
-# Check if script is run with root privileges
-if ((EUID != 0)); then
-    echo -e "\033[91m limine-snapshot-sync-arm-watcher must be run with root privileges.\033[0m" >&2
-    exit 1
-fi
-
-# Check if root filesystem is Btrfs
-fstype=$(findmnt --mountpoint / -no FSTYPE)
-if [[ "$fstype" != "btrfs" ]]; then
-    echo -e "\033[91m Root filesystem is not Btrfs. Watcher stopped.\033[0m" >&2
-    exit 0
-fi
-
-# Check if we're in a read-only snapshot
-if [[ $(btrfs property get / ro 2>/dev/null) == *true ]]; then
-    echo -e "\033[91m You are in a read-only Btrfs snapshot. Watcher stopped.\033[0m" >&2
-    exit 0
-fi
-
-# Check if we're booted from a snapshot
-cmdline=$(</proc/cmdline)
-if [[ $cmdline =~ rootflags.*subvol=.*?/([0-9]+)/snapshot ]]; then
-    echo -e "\033[91m You are booted from a snapshot. Watcher stopped.\033[0m" >&2
-    exit 0
-fi
-
-# Initial sync if snapshots directory exists
-if [[ -d "$WATCH_DIR" ]]; then
-    echo "Running initial snapshot sync..."
-    $SYNC_CMD
-fi
-
-# Monitor directory for creation/deletion events
-echo "Monitoring $WATCH_DIR for snapshot changes..."
-inotifywait -q -m -e create -e delete --format '%e|%f' "${WATCH_DIR}" | while IFS='|' read -r event snapID; do
-    echo "[EVENT] $event -> $snapID"
-    # Run sync in background to avoid blocking
-    $SYNC_CMD &
-done
-EOF
-
-sudo chmod +x /usr/local/bin/limine-snapshot-sync-arm-watcher
+# Copy service files from the Omarchy repository
+sudo cp /tmp/omarchy-tmp/install/systemd/omarchy-limine-snapshot.service /etc/systemd/system/
+sudo cp /tmp/omarchy-tmp/install/systemd/omarchy-limine-snapshot.path /etc/systemd/system/
+sudo chmod 644 /etc/systemd/system/omarchy-limine-snapshot.*
 
 # Install inotify-tools for directory monitoring
 sudo pacman -S --needed --noconfirm inotify-tools
 
-# Create systemd service for automatic syncing
-sudo tee /etc/systemd/system/limine-snapshot-sync-arm.service <<'EOF'
-[Unit]
-Description=Limine ARM64 Snapshot Sync Service
-After=multi-user.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/local/bin/limine-snapshot-sync-arm-watcher
-Restart=on-failure
-RestartSec=10s
-
-# Security hardening
-CapabilityBoundingSet=CAP_SYS_ADMIN
-LockPersonality=yes
-ProtectControlGroups=yes
-ProtectClock=yes
-ProtectHome=yes
-ProtectHostname=yes
-ProtectKernelLogs=yes
-ProtectKernelModules=yes
-ProtectKernelTunables=yes
-ReadWritePaths=/tmp /boot/EFI/BOOT
-RemoveIPC=yes
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-RestrictNamespaces=yes
-RestrictSUIDSGID=yes
-NoNewPrivileges=yes
-SystemCallArchitectures=native
-SystemCallFilter=@system-service @mount
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Create override for any existing limine-snapper-sync service (if installed by Omarchy)
-sudo mkdir -p /etc/systemd/system/limine-snapper-sync.service.d
-sudo tee /etc/systemd/system/limine-snapper-sync.service.d/arm64-override.conf <<'EOF'
-# Override to use ARM64 sync script instead of Java-based tool
-[Service]
-ExecStart=
-ExecStart=/usr/local/bin/limine-snapshot-sync-arm-watcher
-EOF
-
-# Enable and start the service
+# Enable automatic snapshot monitoring
 sudo systemctl daemon-reload
-sudo systemctl enable --now limine-snapshot-sync-arm.service
+sudo systemctl enable --now omarchy-limine-snapshot.path
+sudo systemctl enable omarchy-limine-snapshot.service
 
-# Verify service is running
-sudo systemctl status limine-snapshot-sync-arm.service --no-pager
+# Verify services are running
+sudo systemctl status omarchy-limine-snapshot.path --no-pager
 ```
 
-## Step 6: Create Test Snapshots
+## Step 5: Create Test Snapshots
 
 Note: We'll test the sync script after Limine is installed
 
@@ -634,7 +524,7 @@ Show the last snapshot in the list
 sudo snapper -c root list
 ```
 
-## Step 7: Install Plymouth and Set Up mkinitcpio Hooks
+## Step 6: Install Plymouth and Set Up mkinitcpio Hooks
 
 #### Install Plymouth for boot splash screen
 
@@ -661,7 +551,7 @@ printf "n\n" | sudo mkinitcpio -P
 
 **Create a Parallels snapshot here!** This allows you to easily test different Limine versions or revert if something goes wrong with the following bootloader installation.
 
-## Step 8: Install and Configure Limine
+## Step 7: Install and Configure Limine
 
 This step combines downloading Limine, creating the configuration, and installing everything:
 
@@ -684,11 +574,18 @@ fi
 ls -la BOOTAA64.EFI
 ```
 
-#### Create Tokyo Night themed config with working ARM64 syntax
+#### Generate initial Limine configuration
 
 ```bash
+# Create a basic initial config that omarchy-limine-update will enhance
+ROOT_UUID=$(blkid | grep 'TYPE="btrfs"' | grep -oP 'UUID="\K[^"]+' | head -1)
+if [[ -z "$ROOT_UUID" ]]; then
+    echo "ERROR: Could not find Btrfs root UUID!"
+    exit 1
+fi
+
 sudo tee "$EFI_DIR/limine.conf" <<EOF
-# $EFI_DIR/limine.conf (Limine v9 syntax)
+# Basic Limine configuration (will be enhanced by omarchy-limine-update)
 timeout: 12
 interface_branding: Omarchy Bootloader
 interface_branding_color: 2
@@ -704,26 +601,11 @@ term_background_bright: 24283b
 
 /Arch Linux ARM (Parallels)
     protocol: linux
-    path: boot():/Image
+    kernel_path: boot():/Image
     module_path: boot():/initramfs-linux.img
-    cmdline: root=UUID=YOUR_ROOT_UUID_HERE rw rootfstype=btrfs
+    kernel_cmdline: root=UUID=$ROOT_UUID rw rootfstype=btrfs
 EOF
-```
 
-#### Replace placeholder with actual UUID
-
-```bash
-ROOT_UUID=$(blkid | grep 'TYPE="btrfs"' | grep -oP 'UUID="\K[^"]+' | head -1)
-if [[ -z "$ROOT_UUID" ]]; then
-    echo "ERROR: Could not find Btrfs root UUID!"
-    exit 1
-fi
-sudo sed -i "s/YOUR_ROOT_UUID_HERE/$ROOT_UUID/g" "$EFI_DIR/limine.conf"
-```
-
-Show your Root UUID
-
-```bash
 echo "Using root UUID: $ROOT_UUID"
 ```
 
@@ -784,11 +666,36 @@ sudo efibootmgr --bootorder 0005,${LIMINE_NUM},0002,0003,0000,0004
 ls -la "$EFI_DIR/BOOTAA64.EFI" "$EFI_DIR/limine.conf"
 ```
 
-Preview the final `limine.conf`
+#### Generate the hierarchical menu structure
 
 ```bash
+# Run Omarchy's Limine update to create the hierarchical snapshot menu
+sudo omarchy-limine-update
+
+# Preview the final limine.conf with hierarchical menu
 cat "$EFI_DIR/limine.conf"
 ```
+
+## Test Automatic Snapshot Updates
+
+Verify that the automatic system is working:
+
+```bash
+# Test automatic snapshot detection and menu updates
+sudo snapper -c root create --description "Test automatic updates"
+
+# Wait a moment for the service to trigger, then check the menu
+sleep 2
+cat "$EFI_DIR/limine.conf" | grep -A10 "//Snapshots"
+
+# Monitor automatic updates in real-time (optional)
+sudo journalctl -u omarchy-limine-snapshot.service -f
+```
+
+You should see:
+- Latest snapshot appears at the top (newest first)
+- Hierarchical structure: `/+Omarchy` → `//Snapshots` → `///Snapshot X`
+- Automatic updates when new snapshots are created
 
 ## Test Limine (One-Time Boot\*)
 
@@ -841,7 +748,7 @@ Boot0005* GRUB  HD(2,GPT,d810e6b2-9c8b-4...
 
 ## Automatic Update Snapshots
 
-When using `omarchy-update` or `pacman -Syu`, snapshots will be created automatically and synced to the boot menu via the `limine-snapshot-sync-arm` script.
+When using `omarchy-update` or `pacman -Syu`, snapshots will be created automatically and synced to the boot menu via the `omarchy-limine-snapshot-hook` service. The hierarchical menu structure (`/+Omarchy` → `//Snapshots` → `///Snapshot X`) will be maintained automatically.
 
 ## Manual Snapshot Creation (optional)
 

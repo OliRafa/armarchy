@@ -214,9 +214,52 @@ sudo efibootmgr --bootorder 0005,${LIMINE_NUM},0002,0003,0000,0004
 
 
 echo ""
-echo "=== Basic Limine Configuration Complete ==="
-echo "The hierarchical snapshot menu will be generated automatically when Omarchy is installed."
-echo "For now, you have a working basic Limine configuration."
+echo "=== Step 7: Installing Omarchy Snapshot Automation ==="
+echo "Installing automatic snapshot detection and menu updates..."
+
+# Create the bin directory structure
+OMARCHY_BIN="$HOME/.local/share/omarchy/bin"
+mkdir -p "$OMARCHY_BIN"
+
+# Copy the omarchy scripts (assumes they're in the same directory as this installer)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/bin/omarchy-limine-update" ]]; then
+    cp "$SCRIPT_DIR/bin/omarchy-limine-update" "$OMARCHY_BIN/"
+    cp "$SCRIPT_DIR/bin/omarchy-limine-snapshot-hook" "$OMARCHY_BIN/"
+    chmod +x "$OMARCHY_BIN/omarchy-limine-update"
+    chmod +x "$OMARCHY_BIN/omarchy-limine-snapshot-hook"
+    echo "✅ Omarchy scripts installed to $OMARCHY_BIN"
+else
+    echo "⚠️  Omarchy scripts not found in $SCRIPT_DIR/bin/"
+    echo "   You'll need to install them manually after Omarchy installation"
+fi
+
+# Install systemd service files
+if [[ -f "$SCRIPT_DIR/install/systemd/omarchy-limine-snapshot.service" ]]; then
+    sudo cp "$SCRIPT_DIR/install/systemd/omarchy-limine-snapshot.service" /etc/systemd/system/
+    sudo cp "$SCRIPT_DIR/install/systemd/omarchy-limine-snapshot.path" /etc/systemd/system/
+    sudo chmod 644 /etc/systemd/system/omarchy-limine-snapshot.*
+
+    # Reload systemd and enable services
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now omarchy-limine-snapshot.path
+    sudo systemctl enable omarchy-limine-snapshot.service
+
+    echo "✅ Automatic snapshot services installed and enabled"
+    echo "   Monitoring: /.snapshots for changes"
+else
+    echo "⚠️  Systemd service files not found in $SCRIPT_DIR/install/systemd/"
+    echo "   Automatic snapshot updates will need manual setup"
+fi
+
+echo ""
+echo "=== Generating Enhanced Limine Configuration ==="
+if [[ -x "$OMARCHY_BIN/omarchy-limine-update" ]]; then
+    "$OMARCHY_BIN/omarchy-limine-update"
+    echo "✅ Hierarchical snapshot menu generated"
+else
+    echo "⚠️  omarchy-limine-update not available - using basic configuration"
+fi
 
 echo ""
 echo "=== Verifying Installation ==="
@@ -242,16 +285,25 @@ echo "2. If testing is successful, make Limine permanent:"
 echo "   sudo efibootmgr --bootorder $LIMINE_NUM,0005,0002,0003,0000,0004"
 echo ""
 echo "Features installed:"
-echo "✅ Snapper for Btrfs snapshots"
-echo "✅ Basic Limine configuration ready for Omarchy enhancement"
-echo "✅ Snapper integration ready (hierarchical menu available after Omarchy install)"
-echo "✅ Plymouth boot splash"
+echo "✅ Snapper for Btrfs snapshots (limit: 5 snapshots)"
 echo "✅ Limine 9.5.3 bootloader with Tokyo Night theme"
-echo "✅ Foundation ready for tree-like bootloader menu (enhanced by Omarchy)"
+echo "✅ Hierarchical snapshot menu (/+Omarchy → //Snapshots → ///Snapshot X)"
+echo "✅ Automatic snapshot detection and menu updates"
+echo "✅ Plymouth boot splash"
+echo "✅ Dynamic script discovery (works for any user)"
+echo "✅ Latest 5 snapshots shown (newest first)"
+echo ""
+echo "Automatic services running:"
+echo "- omarchy-limine-snapshot.path (monitors /.snapshots for changes)"
+echo "- omarchy-limine-snapshot.service (updates menu when triggered)"
 echo ""
 echo "Commands available:"
-echo "- sudo snapper -c root create --description 'Description'"
-echo "- sudo omarchy-limine-update (manual menu update - available after Omarchy install)"
-echo "- sudo systemctl status omarchy-limine-snapshot.service (available after Omarchy install)"
-echo "- sudo journalctl -u omarchy-limine-snapshot.service -f (available after Omarchy install)"
-echo "- sudo efibootmgr (to manage boot entries)"
+echo "- sudo snapper -c root create --description 'Description' (creates snapshot + auto-updates menu)"
+echo "- sudo omarchy-limine-update (manual menu update)"
+echo "- sudo systemctl status omarchy-limine-snapshot.service (check service status)"
+echo "- sudo journalctl -u omarchy-limine-snapshot.service -f (monitor automatic updates)"
+echo "- sudo efibootmgr (manage boot entries)"
+echo ""
+echo "Test automatic updates:"
+echo "  sudo snapper -c root create --description 'Test auto-update'"
+echo "  cat /boot/EFI/BOOT/limine.conf | grep -A10 '//Snapshots'"

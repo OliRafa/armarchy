@@ -464,19 +464,36 @@ ssh jon@10.211.55.9
 ## Prerequisites
 
 - Fresh Arch Linux ARM64 on Parallels Desktop
-- Btrfs filesystem with `/root` subvolume
+- Btrfs filesystem with `/root` subvolume (no `/home` subvolume)
 
-#### Prepare EFI Directory
+### Step 0: Verify System State
 
-Ensure the EFI directory structure exists. Run the following:
+Confirm ESP is mounted and accessible
 
 ```bash
-ESP="/boot"
-EFI_DIR="$ESP/EFI/BOOT"
-sudo mkdir -p "$EFI_DIR"
+lsblk -f
+mount | grep -E "(boot|efi)"
+```
+
+Confirm btrfs root
+
+```bash
+findmnt -t btrfs /
+```
+
+Verify we have the expected filesystem layout
+
+```bash
+sudo fdisk -l /dev/sda
 ```
 
 ## Step 1: Install Development Tools
+
+Update the package repositories before installing
+
+```bash
+sudo pacman -Syu
+```
 
 #### Install base requirements
 
@@ -498,7 +515,7 @@ else
 fi
 ```
 
-## Step 2: Install Snapshot Tools
+## Step 2: Install Core Snapshot Infrastructure
 
 ```bash
 sudo pacman -S --needed --noconfirm snapper
@@ -518,13 +535,7 @@ This handles yay's interactive prompts automatically and will install a newer li
 }
 ```
 
-Note: if you get any errors here like 404, run:
-
-```bash
-sudo pacman -Syu
-```
-
-## Step 3: Configure Snapper
+## Step 3: Configure Filesystem Snapshots
 
 #### Create Snapper config (skip if already exists)
 
@@ -545,7 +556,39 @@ sudo sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5"/' /etc/snapper/configs/root &
 sudo sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5"/' /etc/snapper/configs/root
 ```
 
-## Step 4: Install Automatic Snapshot System
+## Step 4: Configure Boot Infrastructure
+
+#### Install Plymouth for boot splash screen
+
+```bash
+sudo pacman -S --needed --noconfirm plymouth
+```
+
+#### Configure hooks with Plymouth and btrfs-overlayfs for snapshot booting
+
+```bash
+sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<'EOF'
+HOOKS=(base udev plymouth keyboard autodetect modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
+EOF
+```
+
+#### Regenerate initramfs (answering 'n' to the prompt)
+
+```bash
+printf "n\n" | sudo mkinitcpio -P
+```
+
+## Step 5: Prepare EFI Environment
+
+Now that we've verified ESP access, create the EFI directory structure:
+
+```bash
+ESP="/boot"
+EFI_DIR="$ESP/EFI/BOOT"
+sudo mkdir -p "$EFI_DIR"
+```
+
+## Step 6: Install Automatic Snapshot System
 
 ### Install Omarchy Scripts
 
@@ -570,8 +613,6 @@ echo -e '\nSuccess: omarchy-limine-update and omarchy-limine-snapshot-hook insta
 ```
 
 ### Install Systemd Services
-
-sudo systemctl status omarchy-limine-snapshot.path --no-pager
 
 ```bash
 sudo cp /tmp/omarchy-tmp/install/systemd/omarchy-limine-snapshot.service /etc/systemd/system/ &&
@@ -599,57 +640,34 @@ Verify services are running
 sudo systemctl status omarchy-limine-snapshot.path --no-pager
 ```
 
-## Step 5: Create Test Snapshots
+## Step 7: Create and Test Initial Snapshots
 
-Note: We'll test the sync script after Limine is installed
+Now snapshots will have proper initramfs support:
 
 ```bash
 sudo snapper -c root create --description "Initial setup"
 ```
 
-Show the last snapshot in the list
+Show the snapshot in the list
 
-```
+```bash
 sudo snapper -c root list
-```
-
-## Step 6: Install Plymouth and Set Up mkinitcpio Hooks
-
-#### Install Plymouth for boot splash screen
-
-```bash
-sudo pacman -S --needed --noconfirm plymouth
-```
-
-#### Configure hooks with Plymouth and btrfs-overlayfs for snapshot booting
-
-```bash
-sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<'EOF'
-HOOKS=(base udev plymouth keyboard autodetect modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
-EOF
-```
-
-#### Regenerate initramfs (answering 'n' to the prompt)
-
-```bash
-
-printf "n\n" | sudo mkinitcpio -P
 ```
 
 ## 🎯 PARALLELS SNAPSHOT POINT 🎯
 
 **Create a Parallels snapshot here!** This allows you to easily test different Limine versions or revert if something goes wrong with the following bootloader installation.
 
-## Step 7: Install and Configure Limine
+## Step 8: Install and Configure Limine Bootloader
 
 This step combines downloading Limine, creating the configuration, and installing everything
 
 #### Download Limine 9.5.3 binary directly
 
 ```bash
-cd /tmp
-rm -rf limine 2>/dev/null || true
-git clone --depth 1 --branch v9.5.3-binary https://github.com/limine-bootloader/limine.git
+cd /tmp &&
+rm -rf limine 2>/dev/null || true &&
+git clone --depth 1 --branch v9.5.3-binary https://github.com/limine-bootloader/limine.git &&
 cd limine
 ```
 
@@ -715,8 +733,8 @@ fi
 
 ```bash
 TMPDIR="/tmp/limine"
-echo "Installing $TMPDIR/BOOTAA64.EFI → $EFI_DIR/BOOTAA64.EFI"
-sudo install -m 0644 "$TMPDIR/BOOTAA64.EFI" "$EFI_DIR/BOOTAA64.EFI"
+echo "Installing $TMPDIR/BOOTAA64.EFI → $EFI_DIR/BOOTAA64.EFI" &&
+sudo install -m 0644 "$TMPDIR/BOOTAA64.EFI" "$EFI_DIR/BOOTAA64.EFI" &&
 
 # Override the older limine version installed by limine-mkinitcpio-hook
 # Our Limine 9.5.3 BOOTAA64.EFI is now the active bootloader
@@ -736,8 +754,8 @@ ENTRY=$(sudo efibootmgr -v | awk '/^Boot[0-9A-Fa-f]{4}/ && (/Limine/ || /\\\\EFI
 
 ```bash
 if [[ -z "$ENTRY" ]]; then
-    echo "Creating new Limine boot entry..."
-    sudo efibootmgr -c -d "$DISK" -p "$ESP_NUM" -L "$LIMINE_LABEL" -l '\EFI\BOOT\BOOTAA64.EFI'
+    echo "Creating new Limine boot entry..." &&
+    sudo efibootmgr -c -d "$DISK" -p "$ESP_NUM" -L "$LIMINE_LABEL" -l '\EFI\BOOT\BOOTAA64.EFI' &&
 
     # Find the newly created entry
     ENTRY=$(sudo efibootmgr -v | awk '/^Boot[0-9A-Fa-f]{4}/ && (/Limine/ || /\\\\EFI\\\\BOOT\\\\BOOTAA64.EFI/){gsub("^Boot","",$1);gsub("\\*","",$1);print $1;exit}')
@@ -749,7 +767,7 @@ fi
 #### Set boot order (keeping GRUB as default for safety)
 
 ```bash
-LIMINE_NUM=$(sudo efibootmgr | grep "Limine" | cut -c5-8)
+LIMINE_NUM=$(sudo efibootmgr | grep "Limine" | cut -c5-8) &&
 sudo efibootmgr --bootorder 0005,${LIMINE_NUM},0002,0003,0000,0004
 ```
 
@@ -773,7 +791,49 @@ Preview the final limine.conf with hierarchical menu
 cat "$EFI_DIR/limine.conf"
 ```
 
-## Test Automatic Snapshot Updates
+If it worked you should see the config updated with a nested snapshot entry!
+
+```bash
+### Read more at config document: https://github.com/limine-bootloader/limine/blob/trunk/CONFIG.md
+timeout: 12
+default_entry: 2
+interface_branding: Omarchy Bootloader
+interface_branding_color: 2
+hash_mismatch_panic: no
+
+term_background: 1a1b26
+backdrop: 1a1b26
+
+# Terminal colors (Tokyo Night palette)
+term_palette: 15161e;f7768e;9ece6a;e0af68;7aa2f7;bb9af7;7dcfff;a9b1d6
+term_palette_bright: 414868;f7768e;9ece6a;e0af68;7aa2f7;bb9af7;7dcfff;c0caf5
+
+# Text colors
+term_foreground: c0caf5
+term_foreground_bright: c0caf5
+term_background_bright: 24283b
+
+/+Omarchy
+comment: Omarchy
+comment: machine-id=9dc2ee64e0f546b5a4f76c909b3064aa order-priority=50
+  //linux
+  comment: linux
+  protocol: linux
+  kernel_path: boot():/Image
+  module_path: boot():/initramfs-linux.img
+  kernel_cmdline: root=UUID=8bb5acb2-a416-4c7c-8fcf-5cf19167807b rootflags=subvol=/root rw rootfstype=btrfs quiet splash
+
+  //Snapshots
+  comment: Select a snapshot to boot into
+    ///Snapshot 1 - Initial setup
+    comment: Snapshot 1
+    protocol: linux
+    kernel_path: boot():/Image
+    module_path: boot():/initramfs-linux.img
+    kernel_cmdline: root=UUID=8bb5acb2-a416-4c7c-8fcf-5cf19167807b rootflags=subvol=root/.snapshots/1/snapshot rw rootfstype=btrfs quiet splash
+```
+
+## Step 9: Test Automatic Snapshot Integration
 
 Verify that the automatic system is working
 
@@ -786,7 +846,7 @@ sudo snapper -c root create --description "Test automatic updates"
 Wait a moment for the service to trigger, then check the menu
 
 ```bash
-cat "$EFI_DIR/limine.conf" | grep -A10 "//Snapshots"
+cat "$EFI_DIR/limine.conf" | grep -A100 "//Snapshots"
 ```
 
 Monitor automatic updates in real-time (optional)
@@ -801,14 +861,18 @@ You should see:
 - Hierarchical structure: `/+Omarchy` → `//Snapshots` → `///Snapshot X`
 - Automatic updates when new snapshots are created
 
-## Test Limine (One-Time Boot\*)
+## Step 10: Test Limine Boot (One-Time)
 
-> \*Set Limine for the next boot only
+Set `limine` for the next boot only as a safety precaution. That way we can choose "reset" from the Actions menu in Parallels if we need to hard reboot the machine because our `limine` configuration didn't work and it'll boot to `GRUB`.
 
 ```bash
 LIMINE_NUM=$(sudo efibootmgr | grep "Limine" | cut -c5-8)
 sudo efibootmgr --bootnext $LIMINE_NUM
 ```
+
+Verify `0001` is set for `BootNext` value
+
+![[CleanShot 2025-09-02 at 15.54.24@2x.png]]
 
 Reboot
 
@@ -828,7 +892,7 @@ If Limine doesn't boot properly you can "reset" the VM and the system will autom
 Limine bootloader with hierarchical snapshot menu
 ![[CleanShot 2025-09-01 at 14.45.13@2x.png]]
 
-## Make `Limine` Permanent (After Testing)
+## Step 11: Make Limine Permanent (After Successful Testing)
 
 Once you've verified Limine works correctly set it as the default bootloader
 
@@ -852,6 +916,10 @@ Boot0003* No OS found   FvVol(45801e53-5...
 Boot0004* UEFI Shell    FvVol(45801e53-5...
 Boot0005* GRUB  HD(2,GPT,d810e6b2-9c8b-4...
 ```
+
+Reboot one final time and you'll have your permanently configured bootloader with restorable snapshots!
+
+![[CleanShot 2025-09-02 at 16.02.07@2x.png]]
 
 ## Automatic Update Snapshots
 
@@ -913,13 +981,15 @@ sudo efibootmgr -v | grep Limine
 
 It should show: `\EFI\BOOT\BOOTAA64.EFI`
 
-# Configuring the `asahi-alarm` ARM mirror
+## Step 12: Configure ARM-Specific Packages (If Needed)
 
-> Before we can install Omarchy, we need to setup the asahi-alarm mirror, since a few package some from there on install.
+### Configuring the `asahi-alarm` ARM mirror
+
+> Before we can install Omarchy, we need to setup the asahi-alarm mirror, since a few packages come from there on install.
 
 ⚠️⚠️⚠️ ONLY DO THIS ON M-SERIES (m1/m2) MACS RUNNING `asahi-alarm` ⚠️⚠️⚠️
 
-## Setup the asahi-alarm mirror
+#### Setup the asahi-alarm mirror
 
 Edit the `/etc/pacman.conf` file and add the \[asahi-alarm\] entry before any others.
 
@@ -966,11 +1036,11 @@ sudo pacman -Syu
 
 Install widevine?
 
-# Actually Installing Omarchy
+## Step 13: Install Omarchy
 
 We made it! Definitely take a snapshot in both Arch and Parallels at this point so that you have a fresh pre-Omarchy install attempt point to revert to.
 
-## Install `wget`
+### Install `wget`
 
 ```bash
 sudo pacman -S wget

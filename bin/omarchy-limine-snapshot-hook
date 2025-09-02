@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Hook script to update Limine config when snapshots change
+# Can be called by snapper hooks or systemd services
+
+# Only run if limine is installed
+if ! command -v limine &>/dev/null; then
+    exit 0
+fi
+
+# Check if we're in a chroot environment
+if [[ -n "${OMARCHY_CHROOT_INSTALL:-}" ]]; then
+    exit 0
+fi
+
+# Check if root filesystem is Btrfs
+fstype=$(findmnt --mountpoint / -no FSTYPE)
+if [[ "$fstype" != "btrfs" ]]; then
+    echo "Root filesystem is not Btrfs. Skipping Limine update." >&2
+    exit 0
+fi
+
+# Check if we're in a read-only snapshot
+if [[ $(btrfs property get / ro 2>/dev/null) == *"ro=true"* ]]; then
+    echo "Running from read-only Btrfs snapshot. Skipping Limine update." >&2
+    exit 0
+fi
+
+# Check if we're booted from a snapshot
+cmdline=$(</proc/cmdline)
+if [[ $cmdline =~ rootflags.*subvol=.*/.snapshots/[0-9]+/snapshot ]]; then
+    echo "Booted from a snapshot. Skipping Limine update." >&2
+    exit 0
+fi
+
+# Lock file to prevent concurrent updates
+LOCK_FILE="/tmp/limine-update.lock"
+exec 200>"$LOCK_FILE"
+
+if ! flock -n 200; then
+    echo "Another Limine update is already running. Exiting." >&2
+    exit 0
+fi
+
+# Update the Limine configuration
+/usr/bin/omarchy-limine-update
+
+# Sync to ensure changes are written
+sync
+
+# Release lock
+flock -u 200

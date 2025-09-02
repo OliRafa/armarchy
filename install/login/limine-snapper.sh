@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# Skip for ARM64 systems since limine-snapper-sync is x86_64 only at the
-# moment (or is not yet compatible with limine v9 syntax)
-if [ -n "$OMARCHY_ARM" ]; then
-  echo "Skipping limine-snapper.sh on ARM64 systems. Use install-limine-automated.sh for proper ARM64 Limine + Snapper setup."
-  return 0
-fi
+# Note: limine-snapper-sync package is x86_64 only, but we have a custom
+# implementation for ARM64 systems that provides the same hierarchical menu
 
 if command -v limine &>/dev/null; then
   sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
@@ -69,8 +65,14 @@ term_background_bright: 24283b
  
 EOF
 
-  sudo pacman -S --noconfirm --needed limine-snapper-sync limine-mkinitcpio-hook
-  sudo limine-update
+  # Install limine-snapper-sync only on x86_64
+  if [ -z "$OMARCHY_ARM" ]; then
+    sudo pacman -S --noconfirm --needed limine-snapper-sync limine-mkinitcpio-hook
+    sudo limine-update
+  else
+    # Use our custom implementation for ARM64
+    sudo $OMARCHY_PATH/bin/omarchy-limine-update
+  fi
 
   # Match Snapper configs if not installing from the ISO
   if [ -z "${OMARCHY_CHROOT_INSTALL:-}" ]; then
@@ -88,7 +90,14 @@ EOF
   sudo sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5"/' /etc/snapper/configs/{root,home}
   sudo sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5"/' /etc/snapper/configs/{root,home}
 
-  chrootable_systemctl_enable limine-snapper-sync.service
+  if [ -z "$OMARCHY_ARM" ]; then
+    chrootable_systemctl_enable limine-snapper-sync.service
+  else
+    # Enable our custom service for ARM64
+    sudo cp $OMARCHY_PATH/install/systemd/omarchy-limine-snapshot.* /etc/systemd/system/
+    chrootable_systemctl_enable omarchy-limine-snapshot.path
+    chrootable_systemctl_enable omarchy-limine-snapshot.service
+  fi
 fi
 
 # Add UKI entry to UEFI machines to skip bootloader showing on normal boot

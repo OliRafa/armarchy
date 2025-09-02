@@ -7,13 +7,17 @@
 set -e
 
 LIMINE_CONF="/boot/limine.conf"
-LIMINE_CONF_EFI="/boot/EFI/limine/limine.conf"
+LIMINE_CONF_EFI_LIMINE="/boot/EFI/limine/limine.conf"
+LIMINE_CONF_EFI_BOOT="/boot/EFI/BOOT/limine.conf"
 ESP_PATH="/boot"
 MACHINE_ID=$(cat /etc/machine-id)
 
-# Determine limine.conf location
-if [[ -f "$LIMINE_CONF_EFI" ]]; then
-    LIMINE_CONFIG="$LIMINE_CONF_EFI"
+# Determine limine.conf location (check multiple possible locations)
+if [[ -f "$LIMINE_CONF_EFI_BOOT" ]]; then
+    LIMINE_CONFIG="$LIMINE_CONF_EFI_BOOT"
+    EFI_MODE=true
+elif [[ -f "$LIMINE_CONF_EFI_LIMINE" ]]; then
+    LIMINE_CONFIG="$LIMINE_CONF_EFI_LIMINE"
     EFI_MODE=true
 else
     LIMINE_CONFIG="$LIMINE_CONF"
@@ -28,6 +32,8 @@ fi
 # Function to get kernel cmdline from existing config or default
 get_kernel_cmdline() {
     if [[ -f "$LIMINE_CONFIG" ]]; then
+        # Try new syntax first, then old syntax
+        grep "^[[:space:]]*kernel_cmdline:" "$LIMINE_CONFIG" | head -1 | sed 's/^[[:space:]]*kernel_cmdline:[[:space:]]*//' || \
         grep "^[[:space:]]*cmdline:" "$LIMINE_CONFIG" | head -1 | sed 's/^[[:space:]]*cmdline:[[:space:]]*//' || echo ""
     else
         echo ""

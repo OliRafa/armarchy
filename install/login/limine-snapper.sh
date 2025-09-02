@@ -8,12 +8,20 @@ if command -v limine &>/dev/null; then
 HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
 EOF
 
-  [[ -f /boot/EFI/limine/limine.conf ]] && EFI=true
+  # Check for EFI mode and determine config location
+  if [[ -f /boot/EFI/BOOT/limine.conf ]]; then
+    EFI=true
+    limine_config="/boot/EFI/BOOT/limine.conf"
+  elif [[ -f /boot/EFI/limine/limine.conf ]]; then
+    EFI=true
+    limine_config="/boot/EFI/limine/limine.conf"
+  else
+    limine_config="/boot/limine/limine.conf"
+  fi
 
-  # Conf location is different between EFI and BIOS
-  [[ -n "$EFI" ]] && limine_config="/boot/EFI/limine/limine.conf" || limine_config="/boot/limine/limine.conf"
-
-  CMDLINE=$(grep "^[[:space:]]*cmdline:" "$limine_config" | head -1 | sed 's/^[[:space:]]*cmdline:[[:space:]]*//')
+  # Try new syntax first, then old syntax
+  CMDLINE=$(grep "^[[:space:]]*kernel_cmdline:" "$limine_config" | head -1 | sed 's/^[[:space:]]*kernel_cmdline:[[:space:]]*//' || \
+           grep "^[[:space:]]*cmdline:" "$limine_config" | head -1 | sed 's/^[[:space:]]*cmdline:[[:space:]]*//')
 
   sudo tee /etc/default/limine <<EOF >/dev/null
 TARGET_OS_NAME="Omarchy"

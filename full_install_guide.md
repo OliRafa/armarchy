@@ -3,326 +3,326 @@
 Download archboot from here https://release.archboot.com/aarch64/latest/iso/
 
 The archboot download page showing available ISO options:
-![[CleanShot 2025-08-30 at 18.25.18@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.25.18@2x.png]]
 I chose the largest one, which is an offline "local" installer.
 
 > **Network Requirements**: Local ISOs work offline (largest), standard ISOs need internet (medium), netboot (smallest) requires _wired_ ethernet.
 
 ## Create a new VM choosing "Install from an image file"
 
-![[CleanShot 2025-08-30 at 18.33.29@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.33.29@2x.png]]
 
 ## Choose your iso manually
 
-![[CleanShot 2025-08-30 at 18.35.16@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.35.16@2x.png]]
 
 Click "select a file..."
-![[CleanShot 2025-08-30 at 18.37.59@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.37.59@2x.png]]
 
 Browse and select the downloaded archboot ISO file
-![[CleanShot 2025-08-30 at 18.38.27@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.38.27@2x.png]]
 
 A warning will pop up stating "Unable to detect operating system". That's fine, click "Continue".
-![[CleanShot 2025-08-30 at 18.36.03@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.36.03@2x.png]]
 
 Choose "Other" from the operating system list
-![[CleanShot 2025-08-30 at 18.39.05@2x 1.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.39.05@2x 1.png]]
 
 Name your VM, choose a location, then check "Customize settings before installation":
-![[CleanShot X 2025-08-30 18.40.59.png]]
+![[install_guide/CleanShot X 2025-08-30 18.40.59.png]]
 
 The Configuration window will appear with VM settings
-![[CleanShot 2025-08-30 at 18.41.21@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.41.21@2x.png]]
 
 Customize the Hardware preferences (CPU and Memory)
-![[CleanShot 2025-08-30 at 18.45.21@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 18.45.21@2x.png]]
 
 Graphics settings configuration:
-![[CleanShot 2025-08-30 at 19.34.08@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 19.34.08@2x.png]]
 
 The hard drive will only allow us to install the default 64gb capacity, but we'll grow that after we boot to the new OS
-![[CleanShot 2025-08-30 at 19.40.11@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 19.40.11@2x.png]]
 
 ## Ensure CD/DVD is chosen for boot order, initially
 
-![[CleanShot 2025-08-30 at 19.31.36@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 19.31.36@2x.png]]
 
 I didn't enable disk encryption
-![[CleanShot 2025-08-30 at 19.32.18@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 19.32.18@2x.png]]
 
 Up to you, but I'm leaving SmartGuard off. I plan to manually take snapshots and use the built-in limine bootloader snapshot capabilities, just like "real" hardware!
-![[CleanShot 2025-08-30 at 19.33.15@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 19.33.15@2x.png]]
 
 ## Since you've selected the ISO, start the machine and it'll boot to this screen
 
-![[CleanShot 2025-08-30 at 21.12.40@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.12.40@2x.png]]
 
 ## Then it'll boot to the Aarch64 ISO
 
-![[CleanShot 2025-08-30 at 21.11.53@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.11.53@2x.png]]
 
 ## Choose "ENTER" and set it up with your locale.
 
-![[CleanShot 2025-08-30 at 21.34.15@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.34.15@2x.png]]
 
 ## Then choose "No" when prompted to use Online Mode since the mirrors are experiencing DDoS attacks as of August 2025.
 
-![[CleanShot 2025-08-30 at 21.13.52@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.13.52@2x.png]]
 
 Configure your timezone region
-![[CleanShot 2025-08-30 at 21.14.31@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.14.31@2x.png]]
 
 Choose the nearest city in your timezone
-![[CleanShot 2025-08-30 at 21.14.54@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.14.54@2x.png]]
 
 Confirm the date
-![[CleanShot 2025-08-30 at 21.39.25@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.39.25@2x.png]]
 
 Confirm the time
-![[CleanShot 2025-08-30 at 21.39.33@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.39.33@2x.png]]
 
 Launch Archboot Setup
-![[CleanShot 2025-08-30 at 21.15.41@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.15.41@2x.png]]
 
 Prepare Storage Device
-![[CleanShot 2025-08-30 at 21.47.48@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.47.48@2x.png]]
 
 Choose "Quick Setup (erases the ENTIRE storage device)"
-![[CleanShot 2025-08-30 at 21.52.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.52.49@2x.png]]
 
 Choose your storage device (there is only one option)
-![[CleanShot 2025-08-30 at 21.52.55@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.52.55@2x.png]]
 
 Select the PARTUUID Device Name Scheme since we have a GPT disk
-![[CleanShot 2025-08-30 at 21.53.01@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.53.01@2x.png]]
 
 Choose SINGLEBOOT for the EFI System Partition (ESP)
-![[CleanShot 2025-08-30 at 21.53.10@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.53.10@2x.png]]
 
 Accept the default of 512mb for the EFI System Partition size
-![[CleanShot 2025-08-30 at 21.59.11@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.59.11@2x.png]]
 
 Choose the default of 256mb for the Swap partition
-![[CleanShot 2025-08-30 at 21.59.21@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.59.21@2x.png]]
 
 Choose btrfs for the Filesystem type
-![[CleanShot 2025-08-30 at 21.59.30@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.59.30@2x.png]]
 
 Confirm Filesystem will be used for / and /home
-![[CleanShot 2025-08-30 at 21.59.38@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 21.59.38@2x.png]]
 
 Set the /home volume to 0 to nest the /home directory within the root btrfs partition
-![[CleanShot 2025-08-30 at 22.00.06@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.00.06@2x.png]]
 
 Confirm the full size will be used for the root partition
-![[CleanShot 2025-08-30 at 22.00.45@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.00.45@2x.png]]
 
 Confirm the volume /dev/sda will be COMPLETELY ERASED!
-![[CleanShot 2025-08-30 at 22.00.53@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.00.53@2x.png]]
 
 Filesystem created successfully
-![[CleanShot 2025-08-30 at 22.00.59@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.00.59@2x.png]]
 
 Quick Setup was successful
-![[CleanShot 2025-08-30 at 22.13.46@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.13.46@2x.png]]
 
 ## Step 2 - Install Packages
 
 Select "Install Packages" from the main menu
-![[CleanShot 2025-08-30 at 22.04.14@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.04.14@2x.png]]
 
 Package installation menu:
-![[CleanShot 2025-08-30 at 22.04.30@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.04.30@2x.png]]
 
 Package installation in progress:
-![[CleanShot 2025-08-30 at 22.14.14@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.14.14@2x.png]]
 
 Package selection complete:
-![[CleanShot 2025-08-30 at 22.14.31@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.14.31@2x.png]]
 
 Let it complete, then choose "Configure System"
-![[CleanShot 2025-08-30 at 22.06.09@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.06.09@2x.png]]
 
 Set a new root password
-![[CleanShot 2025-08-30 at 22.06.15@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.06.15@2x.png]]
 
 Confirm root password
-![[CleanShot 2025-08-30 at 22.15.21@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.15.21@2x.png]]
 
 Don't be a baby... neovim for the win!
-![[CleanShot 2025-08-30 at 22.06.27@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.06.27@2x.png]]
 
 Package installation complete
-![[CleanShot 2025-08-30 at 22.15.34@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.15.34@2x.png]]
 
 ## MKINITCPIO Setup
 
 MKINITCPIO configuration menu
-![[CleanShot 2025-08-30 at 22.06.59@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.06.59@2x.png]]
 
 MKINITCPIO generation in progress
-![[CleanShot 2025-08-30 at 22.15.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.15.49@2x.png]]
 
 When that completes you'll see this
 
 MKINITCPIO complete, back to configuration menu
 
 Enter User Management
-![[CleanShot 2025-08-30 at 22.07.29@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.07.29@2x.png]]
 
 Choose "Set the default shell"
-![[CleanShot 2025-08-30 at 22.07.55@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.07.55@2x.png]]
 
 Choose BASH (the Omarchy default). I highly recommend against changing to zsh or fish until you have everything fully configured how you want it. Even then all the update scripts, etc. run through Bash, so even though I'm a long time zsh user, I'm personally just going to stick with Bash and adapt my tooling accordingly. The only thing I really miss is better auto completion, but there are packages for that.
-![[CleanShot 2025-08-30 at 22.08.16@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.08.16@2x.png]]
 
 Shell configuration complete
-![[CleanShot 2025-08-30 at 22.16.09@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.16.09@2x.png]]
 
 ## Create a user account
 
 User account creation menu:
-![[CleanShot 2025-08-30 at 22.08.38@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.08.38@2x.png]]
 
 Enter username
-![[CleanShot 2025-08-30 at 22.08.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.08.49@2x.png]]
 
 Enable `user` as Administrator and part of the wheel group
-![[CleanShot 2025-08-30 at 22.08.56@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.08.56@2x.png]]
 
 Enter full name
-![[CleanShot 2025-08-30 at 22.09.07@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.09.07@2x.png]]
 
 Set user password
-![[CleanShot 2025-08-30 at 22.09.13@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.09.13@2x.png]]
 
 Confirm user password
-![[CleanShot 2025-08-30 at 22.09.18@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.09.18@2x.png]]
 
 New password set successfully
-![[CleanShot 2025-08-30 at 22.09.24@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.09.24@2x.png]]
 
 User account created successfully
-![[CleanShot 2025-08-30 at 22.17.10@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.17.10@2x.png]]
 
 Return to main configuration menu
-![[CleanShot 2025-08-30 at 22.09.38@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.09.38@2x.png]]
 
 ## Return to main menu
 
-![[CleanShot 2025-08-30 at 22.23.30@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.23.30@2x.png]]
 
 ## Install Bootloader
 
 Bootloader installation menu
-![[CleanShot 2025-08-30 at 22.30.44@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.30.44@2x.png]]
 
 ## Install the GRUB_EUFI Bootloader
 
-![[CleanShot 2025-08-30 at 22.31.55@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.31.55@2x.png]]
 
 GRUB installation complete
-![[CleanShot 2025-08-30 at 22.32.27@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.32.27@2x.png]]
 
 Proceed to open GRUB(2) configuration file in neovim
-![[CleanShot 2025-08-30 at 22.32.35@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.32.35@2x.png]]
 
 ## Review GRUB_EUFI Configuration file
 
-![[CleanShot 2025-08-30 at 22.32.46@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.32.46@2x.png]]
 
 Just save and quit again `:wq`
 
-![[CleanShot 2025-08-30 at 22.33.18@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.33.18@2x.png]]
 
 GRUB configuration saved
-![[CleanShot 2025-08-30 at 22.33.33@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.33.33@2x.png]]
 
 Bootloader installation complete
-![[CleanShot 2025-08-30 at 22.33.36@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.33.36@2x.png]]
 
 Final installation summary
-![[CleanShot 2025-08-30 at 22.33.57@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.33.57@2x.png]]
 
 ## Reboot to your new aarch64 install!
 
-![[CleanShot 2025-08-30 at 22.34.12@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.34.12@2x.png]]
 
 ## Remove the ISO from the cd/dvd drive before reboot!
 
-![[CleanShot 2025-08-31 at 00.06.32@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.06.32@2x.png]]
 
 ## Disconnect the ISO in 10s before the reboot happens!
 
-![[CleanShot 2025-08-31 at 00.09.18@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.09.18@2x.png]]
 
 Then you'll boot to the GRUB menu. Choose:
 
 \*Arch Linux
 
 ...and boot your new system!
-![[CleanShot 2025-08-30 at 22.36.16@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.36.16@2x.png]]
 
 Arch Linux login prompt
-![[CleanShot 2025-08-30 at 22.37.06@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.37.06@2x.png]]
 For me it's "jon" and my password and I'm logged in
 
 ## Congrats! You now have aarch64 installed to a VM!
 
-![[CleanShot 2025-08-30 at 22.37.29@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.37.29@2x.png]]
 
 ## Shutdown the machine so we can resize the hard drive before installing Omarchy
 
-![[CleanShot 2025-08-30 at 22.38.06@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.38.06@2x.png]]
 
 Again, not sure why, but it seems like a bug that you have to fully install `aarch64` before you can resize the Parallels Hard Drive. Typically you'd be able to do that when setting it up, which would save us some steps, but it's not that big of a deal. Let's increase the Parallels disk size now that `aarch64` is installed.
 
 ## Open Parallels Control Center and right click your VM
 
-![[CleanShot 2025-08-30 at 22.39.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.39.49@2x.png]]
 
 ## Choose "Configure..."
 
-![[CleanShot 2025-08-30 at 22.40.30@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.40.30@2x.png]]
 
 ## Set the Hard Drive size to be 128gb or larger (I chose 256gb) and click "Apply"
 
-![[CleanShot 2025-08-30 at 22.41.36@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.41.36@2x.png]]
 
 ## Choose "Continue"
 
-![[CleanShot 2025-08-30 at 22.42.06@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.42.06@2x.png]]
 
 I chose 256gb for my root volume
-![[CleanShot 2025-08-30 at 22.43.48@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.43.48@2x.png]]
 
 Enable TRIM
-![[Untitled 3.png]]
+![[install_guide/Untitled 3.png]]
 
 The warning says we're not on an SSD, but we are. I _think_ this is fine, but more research is needed. It's possible that if the machine doesn't _think_ it's on an SSD, even though it is, this could impact performance. Please let me know in the comments.
 
 Confirm we want to enable TRIM
-![[CleanShot 2025-08-30 at 22.46.15@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.46.15@2x.png]]
 
 Press OK
-![[CleanShot 2025-08-30 at 22.47.14@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.47.14@2x.png]]
 
 Now you have a Parallels VM with Aarch64 and a 256GB Hard drive which is big enough for Omarchy to be installed on.
 
 Go back to the Control Center and double click your new VM to launch it!
 
 Parallels Control Center - ready to launch VM
-![[CleanShot 2025-08-30 at 22.48.29@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.48.29@2x.png]]
 
 Press Play!
-![[CleanShot 2025-08-30 at 22.48.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.48.49@2x.png]]
 
 At the GRUB bootloader, choose: `*Arch Linux`
-![[CleanShot 2025-08-30 at 22.49.03@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.49.03@2x.png]]
 
 Now you're back to the login, so login with the root user and the password you set for the root user so that we can install the `sudo` package to allow elevating our normal user with root permissions.
 
-![[CleanShot 2025-08-30 at 23.00.26@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.00.26@2x.png]]
 
 Install `sudo` and `openssh`
 
@@ -330,13 +330,13 @@ Install `sudo` and `openssh`
 pacman -Syu sudo openssh
 ```
 
-![[CleanShot 2025-08-30 at 23.20.38@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.20.38@2x.png]]
 
 Confirm package installation
-![[CleanShot 2025-08-30 at 23.21.19@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.21.19@2x.png]]
 
 Package installation complete
-![[CleanShot 2025-08-30 at 23.22.23@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.22.23@2x.png]]
 
 ## Instal `vi` so we can check the sudoers files
 
@@ -344,11 +344,11 @@ Package installation complete
 pacman -Syu vi
 ```
 
-![[CleanShot 2025-08-30 at 23.23.53@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.23.53@2x.png]]
 
 Now run `visudo` and update the sudoers configuration to look like this enabling all commands for users of the `wheel` group, which we previously setup for our user.
 
-![[CleanShot 2025-08-30 at 23.24.52@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.24.52@2x.png]]
 
 Save and quit the visudo file with `:wq`
 
@@ -361,7 +361,7 @@ systemctl enable sshd
 systemctl start sshd
 ```
 
-![[CleanShot 2025-08-30 at 23.28.28@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.28.28@2x.png]]
 
 ### Check SSH is running
 
@@ -369,7 +369,7 @@ systemctl start sshd
 systemctl status sshd
 ```
 
-![[CleanShot 2025-08-30 at 23.28.54@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.28.54@2x.png]]
 
 ## Find your VM's IP address
 
@@ -377,11 +377,11 @@ systemctl status sshd
 ip addr show
 ```
 
-![[CleanShot 2025-08-30 at 23.29.31@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.29.31@2x.png]]
 
 Now we can connect from our host machine over SSH in something like Ghostty or iTerm2 or Alacrity, etc. to more easily copy and paste commands!
 
-![[CleanShot 2025-08-30 at 23.31.01@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.31.01@2x.png]]
 
 Ensure that we have full compatibility by adding `export TERM=xterm-256color` to the bottom of the `~/.bashrc` file like so:
 
@@ -389,7 +389,7 @@ Ensure that we have full compatibility by adding `export TERM=xterm-256color` to
 export TERM=xterm-256color
 ```
 
-![[CleanShot 2025-08-30 at 23.35.24@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.35.24@2x.png]]
 
 Write and quit with `:wq` then close the connection by typing `exit` and then re-connect and you should have the ability to type `clear` amongst other things. We're fully compatible now!
 
@@ -398,11 +398,11 @@ Write and quit with `:wq` then close the connection by typing `exit` and then re
 Check the partition names with `lsblk` and `sudo fdisk -l`
 
 Current partition layout before resize
-![[CleanShot 2025-08-31 at 00.19.12@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.19.12@2x.png]]
 
 ## Install the `parted` disk utility
 
-![[CleanShot 2025-08-31 at 00.21.12@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.21.12@2x.png]]
 
 ## Grow the partition with `parted`
 
@@ -410,15 +410,15 @@ Current partition layout before resize
 sudo parted /dev/sda resizepart 4 100%
 ```
 
-![[CleanShot 2025-08-31 at 00.21.43@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.21.43@2x.png]]
 
 We can ignore the details in the "Information:" response
 
-![[CleanShot 2025-08-31 at 00.22.15@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.22.15@2x.png]]
 
 Our root partition is now 256gb. Huzzah!
 
-![[CleanShot 2025-08-31 at 00.22.58@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.22.58@2x.png]]
 
 ## Finally, resize the Btrfs filesystem to use the expanded partition
 
@@ -431,7 +431,7 @@ sudo btrfs filesystem resize max /
 This command resizes the Btrfs filesystem on the root mount point (/) to use the maximum available space on the partition.
 
 Notice how `/dev/sda4` increases in size after this command.
-![[CleanShot 2025-09-02 at 14.09.54@2x.png]]
+![[install_guide/CleanShot 2025-09-02 at 14.09.54@2x.png]]
 
 At this point I'd recommend taking a snapshot of the system so that if any of the following steps fail, we can easily restore to this point in time.
 
@@ -443,11 +443,11 @@ Shutdown the VM
 shutdown now
 ```
 
-![[CleanShot 2025-08-31 at 00.24.34@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.24.34@2x.png]]
 
 When you open Parallels back up, before booting, choose "Take Snapshot..." from the "Actions" menu.
 
-![[CleanShot 2025-08-31 at 00.25.25@2x.png]]
+![[install_guide/CleanShot 2025-08-31 at 00.25.25@2x.png]]
 
 Name and describe your snapshot, save it, and reboot the system. From this safe point, we'll configure the default bootloader that Omarchy's ISO uses so we can take advantage of automatic snapshots the same way an ISO installed to real hardware would.
 
@@ -872,7 +872,7 @@ sudo efibootmgr --bootnext $LIMINE_NUM
 
 Verify `0001` is set for `BootNext` value
 
-![[CleanShot 2025-09-02 at 15.54.24@2x.png]]
+![[install_guide/CleanShot 2025-09-02 at 15.54.24@2x.png]]
 
 Reboot
 
@@ -890,7 +890,7 @@ Your SSH session will disconnect. Open Parallels and you should see:
 If Limine doesn't boot properly you can "reset" the VM and the system will automatically boot back to GRUB.
 
 Limine bootloader with hierarchical snapshot menu
-![[CleanShot 2025-09-01 at 14.45.13@2x.png]]
+![[install_guide/CleanShot 2025-09-01 at 14.45.13@2x.png]]
 
 ## Step 11: Make Limine Permanent (After Successful Testing)
 
@@ -919,7 +919,7 @@ Boot0005* GRUB  HD(2,GPT,d810e6b2-9c8b-4...
 
 Reboot one final time and you'll have your permanently configured bootloader with restorable snapshots!
 
-![[CleanShot 2025-09-02 at 16.02.07@2x.png]]
+![[install_guide/CleanShot 2025-09-02 at 16.02.07@2x.png]]
 
 ## Automatic Update Snapshots
 
@@ -981,7 +981,75 @@ sudo efibootmgr -v | grep Limine
 
 It should show: `\EFI\BOOT\BOOTAA64.EFI`
 
-## Step 12: Configure ARM-Specific Packages (If Needed)
+## Step 12: Installing Parallels Tools
+
+Login as root or elevate to root from your currently logged in user:
+
+```bash
+sudo su
+```
+
+Choose Actions -> Install Parallels Tools...
+![[CleanShot 2025-09-02 at 16.08.13@2x.png]]
+
+Click Continue if prompted
+![[CleanShot X 2025-09-02 16.14.27.png]]
+
+Mount the CD Rom
+
+```bash
+mount /dev/cdrom /mnt
+```
+
+Copy the full CD directory to home directory and rename it to `prl-tools-build`:
+
+```bash
+cp -R /mnt ~ &&
+cd ~ &&
+mv mnt prl-tools-build &&
+cd mnt prl-tools-build
+```
+
+Install the prerequisites to build `prl-tools-build`
+
+```bash
+pacman -S fuse2 linux-headers dkms net-tools
+```
+
+Install parallels tools
+
+```
+./install
+```
+
+This shows both an error and success. I had to install the aforementioned packages and then installation worked.
+![[CleanShot 2025-09-02 at 16.46.32@2x.png]]
+
+View the `parallels-tools-install.log` with:
+
+```bash
+cat /var/log/parallels-tools-install.log
+```
+
+## Step 13: Install Omarchy (finally!)
+
+We made it! Definitely take a snapshot in both Arch and Parallels at this point so that you have a fresh pre-Omarchy install attempt point to revert to.
+
+### Install `wget`
+
+```bash
+sudo pacman -S wget
+```
+
+### For ARM64 installation, use the ARM fork
+
+```bash
+wget -qO- https://raw.githubusercontent.com/nilszeilon/armarchy/master/boot.sh | OMARCHY_REPO=jondkinney/armarchy OMARCHY_REF=vm-testing bash
+```
+
+Follow the prompts and good luck...
+
+## Step 14: Configure ARM-Specific Packages (If Needed)
 
 ### Configuring the `asahi-alarm` ARM mirror
 
@@ -1006,11 +1074,11 @@ Include = /etc/pacman.d/mirrorlist.asahi-alarm
 
 Enter "insert mode" by pressing `i` (i for insert) then type in the mirror like so by hand. Press Escape when you're done typing.
 
-![[CleanShot 2025-08-30 at 23.39.19@2x 1.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.39.19@2x 1.png]]
 
 Now save and quit with `:wq`
 
-![[CleanShot 2025-08-30 at 22.20.10@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 22.20.10@2x.png]]
 
 Before we install any packages, we need to add the `asahi-alarm` mirrorlist file with the following command:
 
@@ -1024,7 +1092,7 @@ Then add the following in that file:
 Server = https://github.com/asahi-alarm/asahi-alarm/releases/download/$arch
 ```
 
-![[CleanShot 2025-08-30 at 23.10.55@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.10.55@2x.png]]
 
 Now update the local package mirror databases
 
@@ -1032,24 +1100,6 @@ Now update the local package mirror databases
 sudo pacman -Syu
 ```
 
-![[CleanShot 2025-08-30 at 23.44.49@2x.png]]
+![[install_guide/CleanShot 2025-08-30 at 23.44.49@2x.png]]
 
 Install widevine?
-
-## Step 13: Install Omarchy
-
-We made it! Definitely take a snapshot in both Arch and Parallels at this point so that you have a fresh pre-Omarchy install attempt point to revert to.
-
-### Install `wget`
-
-```bash
-sudo pacman -S wget
-```
-
-### For ARM64 installation, use the ARM fork
-
-```bash
-wget -qO- https://raw.githubusercontent.com/nilszeilon/armarchy/master/boot.sh | OMARCHY_REPO=jondkinney/armarchy OMARCHY_REF=vm-testing bash
-```
-
-Follow the prompts and good luck...

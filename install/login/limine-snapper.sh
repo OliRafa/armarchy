@@ -142,23 +142,15 @@ EOF
     fi
   done
 
-  # Install unified pacman hook for automatic pre-update snapshots (both architectures)
+  # Install unified pacman hook for automatic pre-update snapshots
   sudo mkdir -p /usr/share/libalpm/hooks
   sudo cp $OMARCHY_PATH/install/alpm/hooks/10-omarchy-pre-update-snapshot.hook /usr/share/libalpm/hooks/
   sudo cp $OMARCHY_PATH/bin/omarchy-pre-update-unified /usr/local/bin/
   sudo chmod +x /usr/local/bin/omarchy-pre-update-unified
-  echo "✅ Unified pre-update snapshot hook installed for both architectures"
+  echo "✅ Unified pre-update snapshot hook installed"
 
-  if [ -z "$OMARCHY_ARM" ]; then
-    chrootable_systemctl_enable limine-snapper-sync.service
-    echo "✅ x86_64: Java limine-snapper-sync.service enabled"
-  else
-    # Install and enable our custom service for ARM64 with kernel versioning
-    sudo cp $OMARCHY_PATH/install/systemd/omarchy-limine-snapshot.* /etc/systemd/system/
-    chrootable_systemctl_enable omarchy-limine-snapshot.path
-    chrootable_systemctl_enable omarchy-limine-snapshot.service
-    echo "✅ ARM64: Bash omarchy-limine-snapshot services enabled with kernel versioning"
-  fi
+  chrootable_systemctl_enable limine-snapper-sync.service
+  echo "✅ x86_64: Java limine-snapper-sync.service enabled"
 fi
 
 # Hooks were already re-enabled at the top of this script

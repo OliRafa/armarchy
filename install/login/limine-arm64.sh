@@ -74,6 +74,32 @@ echo "Setting up Limine bootloader for ARM64..."
 echo "Installing Limine and snapper from official repos..."
 sudo pacman -S --needed --noconfirm snapper limine
 
+echo "Configuring snapper for btrfs snapshots..."
+
+# Create snapper config for root if it doesn't exist
+if ! sudo snapper list-configs 2>/dev/null | grep -q "root"; then
+  sudo snapper -c root create-config /
+  echo "Created snapper config for root filesystem"
+fi
+
+# Only create home config if /home is a separate btrfs subvolume
+if sudo btrfs subvolume show /home &>/dev/null && ! sudo snapper list-configs 2>/dev/null | grep -q "home"; then
+  sudo snapper -c home create-config /home
+  echo "Created snapper config for /home"
+fi
+
+# Tweak default Snapper configs - only modify configs that exist
+for config in root home; do
+  if sudo snapper list-configs 2>/dev/null | grep -q "$config"; then
+    sudo sed -i 's/^TIMELINE_CREATE="yes"/TIMELINE_CREATE="no"/' /etc/snapper/configs/$config
+    sudo sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5"/' /etc/snapper/configs/$config
+    sudo sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5"/' /etc/snapper/configs/$config
+    echo "Configured snapper settings for $config"
+  fi
+done
+
+echo "Snapper configuration complete"
+
 echo "Installing limine-mkinitcpio-hook from AUR..."
 "$OMARCHY_PATH/bin/omarchy-aur-install" --makepkg-flags="--needed -r" limine-mkinitcpio-hook
 
@@ -150,5 +176,18 @@ fi
 
 echo "Generating Limine configuration..."
 sudo "$OMARCHY_PATH/bin/omarchy-limine-update"
+
+echo "Installing unified pacman hook for automatic pre-update snapshots..."
+sudo mkdir -p /usr/share/libalpm/hooks
+sudo cp "$OMARCHY_PATH/install/alpm/hooks/10-omarchy-pre-update-snapshot.hook" /usr/share/libalpm/hooks/
+sudo cp "$OMARCHY_PATH/bin/omarchy-pre-update-unified" /usr/local/bin/
+sudo chmod +x /usr/local/bin/omarchy-pre-update-unified
+echo "✅ Unified pre-update snapshot hook installed"
+
+echo "Installing and enabling ARM64 limine-snapshot services..."
+sudo cp "$OMARCHY_PATH/install/systemd/omarchy-limine-snapshot."* /etc/systemd/system/
+chrootable_systemctl_enable omarchy-limine-snapshot.path
+chrootable_systemctl_enable omarchy-limine-snapshot.service
+echo "✅ ARM64: Bash omarchy-limine-snapshot services enabled with kernel versioning"
 
 echo "ARM64 Limine setup complete!"

@@ -1,3 +1,49 @@
+# Skip for ARM systems entirely
+if [ -n "$OMARCHY_ARM" ] || [ -n "$ASAHI_ALARM" ]; then
+  echo "Skipping x86_64 Limine configuration on ARM system"
+  return 0
+fi
+
+# Re-enable mkinitcpio hooks (required for all bootloaders)
+echo "Re-enabling mkinitcpio hooks..."
+
+# Restore the specific mkinitcpio pacman hooks
+if [ -f /usr/share/libalpm/hooks/90-mkinitcpio-install.hook.disabled ]; then
+  sudo mv /usr/share/libalpm/hooks/90-mkinitcpio-install.hook.disabled /usr/share/libalpm/hooks/90-mkinitcpio-install.hook
+fi
+
+if [ -f /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook.disabled ]; then
+  sudo mv /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook.disabled /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook
+fi
+
+echo "mkinitcpio hooks re-enabled"
+
+# Configure mkinitcpio hooks for all x86_64 systems
+echo "Configuring mkinitcpio hooks..."
+sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
+HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
+EOF
+
+# Skip if Limine is not supported (e.g., VMware uses GRUB)
+if [ -n "$OMARCHY_SKIP_LIMINE" ]; then
+  echo "Skipping Limine installation (bootloader not supported on this platform)"
+  echo "Regenerating initramfs for GRUB..."
+
+  # Run mkinitcpio but don't fail on warnings
+  sudo mkinitcpio -P || {
+    exit_code=$?
+    echo "mkinitcpio exited with code $exit_code - checking if initramfs was created..."
+    if [ -f /boot/initramfs-linux.img ]; then
+      echo "Initramfs created successfully despite warnings, continuing..."
+    else
+      echo "Failed to create initramfs, exiting..."
+      exit $exit_code
+    fi
+  }
+
+  return 0
+fi
+
 if command -v limine &>/dev/null; then
   sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
 HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
@@ -67,19 +113,9 @@ EOF
   chrootable_systemctl_enable limine-snapper-sync.service
 fi
 
-echo "Re-enabling mkinitcpio hooks..."
-
-# Restore the specific mkinitcpio pacman hooks
-if [[ -f /usr/share/libalpm/hooks/90-mkinitcpio-install.hook.disabled ]]; then
-  sudo mv /usr/share/libalpm/hooks/90-mkinitcpio-install.hook.disabled /usr/share/libalpm/hooks/90-mkinitcpio-install.hook
-fi
-
-if [[ -f /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook.disabled ]]; then
-  sudo mv /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook.disabled /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook
-fi
-
-echo "mkinitcpio hooks re-enabled"
-
+# mkinitcpio hooks were already re-enabled at the top of this script (before the
+# ARM/SKIP_LIMINE early returns), so they run for every non-ARM path.
+#
 # Installing limine-mkinitcpio-hook above already triggered a full UKI rebuild
 # (via 80-limine-efi-deploy.hook + 90-mkinitcpio-install.hook), which writes the
 # boot entries into /boot/limine.conf. Only fall back to limine-update if those

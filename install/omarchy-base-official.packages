@@ -1,11 +1,13 @@
 # Omarchy core package list installed via install/packaging/base.sh
 # This file is also used by the ISO builder when determining needs
-# Packages that don't work on ARM are in omarchy-x86.packages
+#
+# TODO: update the ISO builder:
+# - Include this file with the new name
+# - Include omarchy-x68.packages
+# - Include omarchy-base-aur.packages
 
-aether
 alacritty
 alsa-utils
-asdcontrol
 avahi
 bash-completion
 bat
@@ -13,10 +15,8 @@ bluetui
 bolt
 brightnessctl
 btop
-chromium
+cargo
 clang
-claude-code
-cliamp
 cups
 cups-browsed
 cups-filters
@@ -24,8 +24,6 @@ cups-pdf
 docker
 docker-buildx
 docker-compose
-dosfstools
-dotnet-runtime-9.0
 dust
 evince
 exfatprogs
@@ -41,6 +39,7 @@ fontconfig
 fzf
 github-cli
 gnome-calculator
+gnome-disk-utility
 gnome-keyring
 gnome-themes-extra
 grim
@@ -51,9 +50,9 @@ gvfs-smb
 hypridle
 hyprland
 hyprland-guiutils
-hyprland-preview-share-picker
 hyprlock
 hyprpicker
+hyprshot
 hyprsunset
 imagemagick
 impala
@@ -68,27 +67,24 @@ kvantum-qt5
 lazydocker
 lazygit
 less
+libqalculate
+libreoffice-fresh
 libsecret
 libyaml
-libqalculate
 llvm
 luarocks
 mako
+man-db
 mariadb-libs
 mise
 mpv
 nautilus
 nautilus-python
-gnome-disk-utility
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
+noto-fonts-extra
 nss-mdns
-nvim
-obs-studio
-obsidian
-omarchy-nvim
-omarchy-walker
 pamixer
 playerctl
 plocate
@@ -98,7 +94,6 @@ postgresql-libs
 power-profiles-daemon
 python-gobject
 python-poetry-core
-python-terminaltexteffects
 qt5-wayland
 ripgrep
 ruby
@@ -106,26 +101,20 @@ rust
 satty
 sddm
 slurp
-spotify
 socat
 starship
 sushi
 swaybg
 swayosd
 system-config-printer
-tesseract
-tesseract-data-eng
 tldr
-tree-sitter-cli
 tmux
-tobi-try
-ttf-ia-writer
+tree-sitter-cli
+ttf-cascadia-mono-nerd
 ttf-jetbrains-mono-nerd
-typora
-tzupdate
 ufw
-ufw-docker
 unzip
+usage
 uwsm
 waybar
 whois
@@ -136,8 +125,6 @@ wl-clipboard
 woff2-font-awesome
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
-xdg-terminal-exec
 xmlstarlet
 xournalpp
-yaru-icon-theme
 zoxide

@@ -36,7 +36,11 @@ if [ -z "$OMARCHY_ARM" ] && [ -z "$ASAHI_ALARM" ] && [ -z "$OMARCHY_SKIP_LIMINE"
   command -v limine &>/dev/null || abort "Limine bootloader"
 fi
 
-# Must have btrfs root filesystem (skip on ARM/Asahi - uses ext4, can't use btrfs)
+# Must have btrfs root filesystem on x86 (snapper/limine-snapper-sync require it).
+# ARM/Asahi setups support either btrfs or ext4. When the root is btrfs and Limine
+# is available — including Asahi systems chainloading Limine via m1n1/U-Boot —
+# install/login/limine-snapper.sh sets up snapshot integration; otherwise the
+# standard `filesystems` mkinitcpio hook is enough for the system to boot.
 if [ -z "$OMARCHY_ARM" ] && [ -z "$ASAHI_ALARM" ]; then
   [[ $(findmnt -n -o FSTYPE /) = "btrfs" ]] || abort "Btrfs root filesystem"
 fi

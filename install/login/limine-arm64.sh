@@ -4,6 +4,10 @@ if [ -z "$OMARCHY_ARM" ]; then
 fi
 
 if [ -n "$ASAHI_ALARM" ]; then
+  # Asahi systems get their bootloader from upstream (m1n1 → U-Boot, optionally
+  # chainloading Limine). Fresh-install bootstrapping of Limine on Asahi isn't
+  # automated here; if Limine is already in place, install/login/limine-snapper.sh
+  # configures snapper + limine-snapper-sync on it.
   echo "This script is for non-Asahi ARM64 systems only"
   return 0
 fi
@@ -22,20 +26,23 @@ fi
 
 echo "mkinitcpio hooks re-enabled"
 
-# Configure hooks based on platform
-# Base hooks shared across all ARM platforms (no microcode on ARM)
+# Configure hooks based on root filesystem.
+# Base hooks shared across all ARM platforms (no microcode on ARM).
 HOOKS="base udev plymouth keyboard autodetect modconf kms keymap consolefont block encrypt filesystems fsck"
 
-# Add btrfs hook for systems using btrfs (VMware and Parallels, but not Asahi)
-if [ -z "$ASAHI_ALARM" ]; then
+# Add btrfs-overlayfs hook when root is btrfs (enables boot-from-snapshot).
+# This is platform-independent — Parallels, VMware, Pi, or any other ARM target
+# that uses btrfs gets the hook; ext4 setups skip it.
+ROOT_FSTYPE=$(findmnt -n -o FSTYPE /)
+if [[ $ROOT_FSTYPE == "btrfs" ]]; then
   HOOKS="$HOOKS btrfs-overlayfs"
 fi
 
 # Configure hooks for all platforms
 if [ -n "$OMARCHY_SKIP_LIMINE" ]; then
-  echo "Configuring mkinitcpio hooks for VMware (btrfs + GRUB)..."
+  echo "Configuring mkinitcpio hooks for VMware ($ROOT_FSTYPE + GRUB)..."
 else
-  echo "Configuring mkinitcpio hooks for Parallels (btrfs + Limine)..."
+  echo "Configuring mkinitcpio hooks for Parallels ($ROOT_FSTYPE + Limine)..."
 fi
 
 sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
@@ -68,7 +75,7 @@ if [ -n "$ASAHI_ALARM" ] || [ -n "$OMARCHY_SKIP_LIMINE" ]; then
   return 0
 fi
 
-# Parallels (or other): btrfs + Limine
+# Parallels (or other): root FS + Limine
 echo "Setting up Limine bootloader for ARM64..."
 
 echo "Installing Limine and snapper from official repos..."

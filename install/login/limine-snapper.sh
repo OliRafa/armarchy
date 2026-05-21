@@ -1,7 +1,32 @@
-# Skip for ARM systems entirely
-if [ -n "$OMARCHY_ARM" ] || [ -n "$ASAHI_ALARM" ]; then
-  echo "Skipping x86_64 Limine configuration on ARM system"
+# limine-snapper.sh configures snapper + limine-snapper-sync on systems where
+# Limine is the bootloader and root is btrfs. It runs on:
+#  - x86 with Limine (the original case)
+#  - Asahi/ARM with Limine chainloaded via m1n1/U-Boot (newer setup)
+#
+# It is *skipped* on:
+#  - non-btrfs systems (snapper requires btrfs)
+#  - ARM/Asahi without Limine installed (handled by limine-arm64.sh or
+#    bin/update-asahi-bootloader instead)
+#  - OMARCHY_SKIP_LIMINE (VMware uses GRUB; handled further down)
+
+if [[ $(findmnt -n -o FSTYPE /) != "btrfs" ]]; then
+  echo "Skipping Limine snapshot setup: root is not btrfs"
   return 0
+fi
+
+if { [ -n "$OMARCHY_ARM" ] || [ -n "$ASAHI_ALARM" ]; } && ! command -v limine &>/dev/null; then
+  echo "Skipping Limine snapshot setup: ARM/Asahi without Limine"
+  echo "  (Limine on Asahi must be installed manually via m1n1/U-Boot chainload;"
+  echo "   omarchy can't bootstrap that yet — see bin/update-asahi-bootloader for"
+  echo "   the non-Limine path.)"
+  return 0
+fi
+
+# Detect Asahi — used below to preserve /etc/mkinitcpio.conf HOOKS instead of
+# overwriting them with an x86-centric set that would drop the `asahi` hook.
+IS_ASAHI=false
+if grep -q "apple" /sys/firmware/devicetree/base/compatible 2>/dev/null; then
+  IS_ASAHI=true
 fi
 
 # Re-enable mkinitcpio hooks (required for all bootloaders)
@@ -18,11 +43,26 @@ fi
 
 echo "mkinitcpio hooks re-enabled"
 
-# Configure mkinitcpio hooks for all x86_64 systems
-echo "Configuring mkinitcpio hooks..."
-sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
+# Configure mkinitcpio hooks.
+# - On Asahi: preserve /etc/mkinitcpio.conf (asahi-alarm's base install already
+#   set up the right HOOKS with `asahi`, `btrfs`, `microcode`, etc. in the right
+#   order). Just sanity-check the essentials.
+# - On x86: write the standard omarchy HOOKS to a drop-in.
+if [[ $IS_ASAHI == "true" ]]; then
+  echo "Asahi detected — preserving existing /etc/mkinitcpio.conf HOOKS"
+  HOOKS_LINE=$(grep -E '^HOOKS=' /etc/mkinitcpio.conf | head -1)
+  if ! grep -qE '\basahi\b' <<<"$HOOKS_LINE"; then
+    echo "WARNING: 'asahi' hook missing from /etc/mkinitcpio.conf — Asahi may not boot"
+  fi
+  if ! grep -qE '\bbtrfs\b' <<<"$HOOKS_LINE"; then
+    echo "WARNING: 'btrfs' hook missing from /etc/mkinitcpio.conf — boot-from-snapshot won't work; add it to HOOKS"
+  fi
+else
+  echo "Configuring mkinitcpio hooks..."
+  sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
 HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
 EOF
+fi
 
 # Skip if Limine is not supported (e.g., VMware uses GRUB)
 if [ -n "$OMARCHY_SKIP_LIMINE" ]; then
@@ -45,12 +85,13 @@ if [ -n "$OMARCHY_SKIP_LIMINE" ]; then
 fi
 
 if command -v limine &>/dev/null; then
-  sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
-HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
-EOF
-  sudo tee /etc/mkinitcpio.conf.d/thunderbolt_module.conf <<EOF >/dev/null
+  # HOOKS were already configured above (Asahi: preserved; x86: written to drop-in).
+  # Thunderbolt module is x86-only (no thunderbolt on Asahi/ARM).
+  if [[ $IS_ASAHI != "true" ]]; then
+    sudo tee /etc/mkinitcpio.conf.d/thunderbolt_module.conf <<EOF >/dev/null
 MODULES+=(thunderbolt)
 EOF
+  fi
 
   # Detect boot mode
   [[ -d /sys/firmware/efi ]] && EFI=true

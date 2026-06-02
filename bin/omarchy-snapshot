@@ -31,28 +31,16 @@ create)
     sudo snapper -c "$config" create -c number -d "$DESC"
     sudo snapper -c "$config" cleanup number
   done
-  echo
-
-  # Trigger Limine update after creating snapshots (architecture-aware)
-  if [[ -x "${OMARCHY_PATH}/bin/omarchy-limine-update" ]]; then
-    echo -e "\e[32mUpdating Limine configuration...\e[0m"
-    sudo "${OMARCHY_PATH}/bin/omarchy-limine-update"
-  fi
+  # limine-snapper-sync watches snapper events and regenerates /boot/limine.conf
+  # with proper kernel versioning. No manual limine update is needed.
   ;;
 restore)
-  # Use architecture-appropriate restoration tool
-  if [ -n "$OMARCHY_ARM" ]; then
-    # ARM64: Use bash implementation with kernel versioning
-    echo -e "\e[32mRestoring snapshot with kernel versioning (ARM64)...\e[0m"
-    sudo "${OMARCHY_PATH}/bin/omarchy-limine-snapper-restore"
-  elif command -v limine-snapper-restore &>/dev/null; then
-    # x86_64: Use Java implementation
-    echo -e "\e[32mRestoring snapshot (x86_64)...\e[0m"
-    sudo limine-snapper-restore
-  else
-    echo -e "\e[31mError: No snapshot restoration tool available\e[0m" >&2
-    echo "Install limine-snapper-sync (x86_64) or bin/omarchy-limine-snapper-restore (ARM64)" >&2
+  if ! command -v limine-snapper-restore &>/dev/null; then
+    echo -e "\e[31mError: limine-snapper-restore not available\e[0m" >&2
+    echo "Install the limine-snapper-sync package." >&2
     exit 1
   fi
+  echo -e "\e[32mRestoring snapshot\e[0m"
+  sudo limine-snapper-restore
   ;;
 esac

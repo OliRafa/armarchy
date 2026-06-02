@@ -155,7 +155,6 @@ if [[ -n "$LIMINE_NUM" ]]; then
     echo "Limine set as default boot option"
 fi
 
-echo "Generating Limine configuration..."
-sudo "$OMARCHY_PATH/bin/omarchy-limine-update"
-
 echo "ARM64 Limine setup complete!"
+echo "limine-mkinitcpio-hook will populate /boot/limine.conf on the next"
+echo "kernel install or initramfs rebuild (e.g., 'sudo mkinitcpio -P')."
